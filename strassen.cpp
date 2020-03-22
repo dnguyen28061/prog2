@@ -47,6 +47,11 @@ Matrix addMatrix(Matrix m1, Matrix m2, int status){
     return Matrix(dummy, 1, 1);
 };
 
+Matrix multConv(Matrix m1, Matrix m2){
+    int* dummy = new int[1];
+    return Matrix(dummy, 1, 1);
+}
+
 int main(){ 
     int* matrix = new int[64];
     int* matrixPtr = matrix; 
