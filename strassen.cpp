@@ -124,6 +124,11 @@ Matrix multiplyStrassen(Matrix m1, Matrix m2){
 }; 
 
 
+Matrix multConv(Matrix m1, Matrix m2){
+    int* dummy = new int[1];
+    return Matrix(dummy, 1, 1);
+}
+
 int main(){ 
     int* matrix = new int[16];
     int* matrixPtr = matrix; 
