@@ -45,6 +45,14 @@ struct Matrix{
         return Matrix(firstNumber, rowLength / 2, matrixLength); 
     }
 
+    // returns element at ith row and jth column
+    int* rowCol(int i, int j){
+        std::cout << i << "\n";
+        std::cout << j << "\n";
+        assert((0 <= i) && (0 <= j) && (i < rowLength) && (j < rowLength));
+        return elt(*firstNum + (rowLength * i) + j);
+    }
+
     void printElts(){ 
         for (int i = 0; i < rowLength * rowLength; ++i){ 
             std::cout << *elt(i) << "\n"; 
@@ -138,7 +146,7 @@ int** multConv(Matrix m1, Matrix m2){
         for (j = 0; j < N; j++){ 
             resMatrix[i][j] = 0;
             for (k = 0; k < N; k++){
-                resMatrix[i][j] += m1.rowCol(i,k) * m2.rowCol(k,j);
+                resMatrix[i][j] += *(m1.rowCol(i,k)) * *(m2.rowCol(k,j));
             }
         }
     }
@@ -165,7 +173,14 @@ int main(){
     std::cout << "\n"; 
     matrixStruct2.printElts(); 
     Matrix resMatrix = multiplyStrassen(matrixStruct, matrixStruct2); 
+    int** convRes = multConv(matrixStruct, matrixStruct2);
     std::cout << "\n";
-    resMatrix.printElts(); 
+    resMatrix.printElts();
+    for (int i = 0; i < matrixStruct.matrixLength; i++) 
+    { 
+        for (int j = 0; j < matrixStruct.matrixLength; j++) 
+        std::cout << convRes[i][j] << " "; 
+        std::cout << "\n"; 
+    }
 }
 
