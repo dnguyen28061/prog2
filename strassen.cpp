@@ -40,10 +40,8 @@ struct Matrix{
 
     // returns element at ith row and jth column
     int* rowCol(int i, int j){
-        std::cout << i << "\n";
-        std::cout << j << "\n";
         assert((0 <= i) && (0 <= j) && (i < rowLength) && (j < rowLength));
-        return elt(*firstNum + (rowLength * i) + j);
+        return elt((rowLength * i) + j);
     }
 
     void printElts(){ 
