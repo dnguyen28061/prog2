@@ -146,7 +146,15 @@ int** multConv(Matrix m1, Matrix m2){
     return resMatrix;
 };
 
-int main(){ 
+int main(int argc, char* argv){ 
+    if (argc != 4) {
+        throw std::invalid_argument("Usage: ./strassen 0 dimension inputfile");
+    }
+    int dimension = atoi(argv[2]); 
+    int* matrix1 = new int[dimension * dimension]; 
+    int* matrix2 = new int[dimension * dimension]; 
+    
+
     int* matrix = new int[16];
     int* matrixPtr = matrix; 
     for(int i = 0; i < 16; ++i){ 
