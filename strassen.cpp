@@ -12,13 +12,6 @@ struct Matrix{
         this->rowLength = blockRows; 
         this-> matrixLength = matrixRows; 
     }
-    // ~Matrix(){ 
-    //     if(firstNum != nullptr){ 
-    //         if (rowLength == matrixLength){ 
-    //             delete[] firstNum; 
-    //         }
-    //     }
-    // }
     
     // For a matrix of 
     int* elt(int n){ 
@@ -61,7 +54,7 @@ int* createNewArray(int n){
         newArrayPointer++; 
     }
     return newArray; 
-}
+};
 // adds two matrices and stores them in resMatrix. Allocates new matrix if it does not exist. 
 Matrix addMatrix(Matrix m1, Matrix m2, bool isAddition = true, Matrix resultMatrix = Matrix(nullptr, 0, 0)){ 
     if (resultMatrix.firstNum == nullptr){ 
@@ -123,6 +116,14 @@ Matrix multiplyStrassen(Matrix m1, Matrix m2){
         addMatrix(intermediates[4], intermediates[0], true, resultMatrix.block(3)); 
         addMatrix(resultMatrix.block(3), intermediates[2], false, resultMatrix.block(3)); 
         addMatrix(resultMatrix.block(3), intermediates[6], false, resultMatrix.block(3)); 
+
+        Matrix matricesToDelete[17] = {FH, AB, CD, GE, AD, EH, BD, GH, AC, EF}; 
+        for(int j = 10; j < 17; ++j){ 
+            matricesToDelete[j] = intermediates[j-10]; 
+        }
+        for (int i = 0; i < 17; ++i){ 
+            delete[] matricesToDelete[i].firstNum; 
+        }
         return resultMatrix; 
     }
 }; 
@@ -155,5 +156,8 @@ int main(){
     Matrix resMatrix = multiplyStrassen(matrixStruct, matrixStruct2); 
     std::cout << "\n";
     resMatrix.printElts(); 
+    delete[] matrix; 
+    delete[] matrix2;
+    delete[] resMatrix.firstNum; 
 }
 
