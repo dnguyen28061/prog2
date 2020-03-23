@@ -30,17 +30,17 @@ struct Matrix{
         assert((0 <= n) &&  (n < 4)); 
         int* firstNumber; 
         if (n == 0){ 
-            firstNumber = firstNum; 
+            firstNumber = this->elt(0); 
         }
         else if (n == 1){ 
-            firstNumber = firstNum + rowLength / 2; 
+            firstNumber = this->elt(rowLength / 2); 
         }
         else if (n == 2){ 
-            firstNumber = firstNum + rowLength * rowLength / 2; 
+            firstNumber = this->elt(rowLength * rowLength / 2); 
         }
         // take the first num of second block and add rowLength / 2 
         else if (n == 3){ 
-            firstNumber = firstNum + (rowLength * rowLength + rowLength) / 2;  
+            firstNumber = this->elt(rowLength * rowLength / 2) + rowLength / 2; 
         }
         return Matrix(firstNumber, rowLength / 2, matrixLength); 
     }
@@ -111,22 +111,19 @@ Matrix multiplyStrassen(Matrix m1, Matrix m2){
         intermediates[5] = multiplyStrassen(BD, GH);
         intermediates[6] = multiplyStrassen(AC, EF);
 
-        Matrix* resultMatrix = new Matrix(resultArray, m1.rowLength, m1.matrixLength); 
+        Matrix resultMatrix = Matrix(resultArray, m1.rowLength, m1.matrixLength); 
 
-        addMatrix(intermediates[4], intermediates[3], true, resultMatrix->block(0)); 
-        addMatrix(resultMatrix->block(0), intermediates[1], false, resultMatrix->block(0)); 
-        addMatrix(resultMatrix->block(0), intermediates[5], true, resultMatrix->block(0));
+        addMatrix(intermediates[4], intermediates[3], true, resultMatrix.block(0)); 
+        addMatrix(resultMatrix.block(0), intermediates[1], false, resultMatrix.block(0)); 
+        addMatrix(resultMatrix.block(0), intermediates[5], true, resultMatrix.block(0));
         
-        addMatrix(intermediates[0], intermediates[1], true, resultMatrix->block(1)); 
-        addMatrix(intermediates[2], intermediates[3], true, resultMatrix->block(2));
+        addMatrix(intermediates[0], intermediates[1], true, resultMatrix.block(1)); 
+        addMatrix(intermediates[2], intermediates[3], true, resultMatrix.block(2));
 
-        addMatrix(intermediates[4], intermediates[0], true, resultMatrix->block(3)); 
-        addMatrix(resultMatrix->block(3), intermediates[2], false, resultMatrix->block(3)); 
-        addMatrix(resultMatrix->block(3), intermediates[6], false, resultMatrix->block(3)); 
-    // for (int i = 0; i < 4; ++i){ 
-    //     std::cout << *(resultMatrix.elt(i)) << "\n"; 
-    // }
-        return *resultMatrix; 
+        addMatrix(intermediates[4], intermediates[0], true, resultMatrix.block(3)); 
+        addMatrix(resultMatrix.block(3), intermediates[2], false, resultMatrix.block(3)); 
+        addMatrix(resultMatrix.block(3), intermediates[6], false, resultMatrix.block(3)); 
+        return resultMatrix; 
     }
 }; 
 
@@ -140,19 +137,23 @@ int main(){
     int* matrix = new int[16];
     int* matrixPtr = matrix; 
     for(int i = 0; i < 16; ++i){ 
-        *matrixPtr = i; 
+        *matrixPtr = rand() % 10; 
         matrixPtr++; 
     } 
     int* matrix2 = new int[16];
     int* matrixPtr2 = matrix2; 
     for(int i = 0; i < 16; ++i){ 
-        *matrixPtr2 = i; 
+        *matrixPtr2 = rand() % 10; 
         matrixPtr2++; 
     } 
 
     Matrix matrixStruct = Matrix(matrix, 4, 4);
     Matrix matrixStruct2 = Matrix(matrix2, 4, 4); 
+    matrixStruct.printElts(); 
+    std::cout << "\n"; 
+    matrixStruct2.printElts(); 
     Matrix resMatrix = multiplyStrassen(matrixStruct, matrixStruct2); 
+    std::cout << "\n";
     resMatrix.printElts(); 
 }
 
