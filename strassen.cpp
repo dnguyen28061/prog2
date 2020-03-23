@@ -7,7 +7,7 @@ struct Matrix{
     int rowLength; 
     int matrixLength; 
     Matrix(int* numbers, int blockRows, int matrixRows){ 
-        this->rowLength = blockRows; 
+        this->rowLength = blockRows;
         this->firstNum = numbers;
         this-> matrixLength = matrixRows; 
         }
@@ -60,9 +60,21 @@ Matrix addMatrix(Matrix matrices[], bool isAddition){
     return Matrix(dummy, 1, 1);
 };
 
-Matrix multConv(Matrix m1, Matrix m2){
-    int* dummy = new int[1];
-    return Matrix(dummy, 1, 1);
+int** multConv(Matrix m1, Matrix m2){
+    int N = m1.matrixLength;
+    int** resMatrix = 0;
+    resMatrix = new int*[N];
+    int i, j, k; 
+    for (i = 0; i < N; i++){ 
+        resMatrix[i] = new int[N];
+        for (j = 0; j < N; j++){ 
+            resMatrix[i][j] = 0;
+            for (k = 0; k < N; k++){
+                resMatrix[i][j] += m1.rowCol(i,k) * m2.rowCol(k,j);
+            }
+        }
+    }
+    return resMatrix;
 }
 
 int main(){ 
