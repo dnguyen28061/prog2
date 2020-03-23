@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <iostream> 
+#include <cassert> 
 
 struct Matrix{
     public: 
@@ -11,15 +12,20 @@ struct Matrix{
         this->rowLength = blockRows; 
         this-> matrixLength = matrixRows; 
     }
-    ~Matrix(){ 
-        if(firstNum != nullptr){ 
-            if (rowLength == matrixLength){ 
-                delete[] firstNum; 
-            }
-        }
-    }
+    // ~Matrix(){ 
+    //     if(firstNum != nullptr){ 
+    //         if (rowLength == matrixLength){ 
+    //             delete[] firstNum; 
+    //         }
+    //     }
+    // }
     
     // For a matrix of 
+    int* elt(int n){ 
+        assert((0 <= n) && (n < rowLength * rowLength)); 
+        int offset = (n / rowLength * matrixLength) + (n % rowLength);
+        return (firstNum + offset); 
+    }
     Matrix block(int n){
         assert((0 <= n) &&  (n < 4)); 
         int* firstNumber; 
@@ -38,10 +44,11 @@ struct Matrix{
         }
         return Matrix(firstNumber, rowLength / 2, matrixLength); 
     }
-    int* elt(int n){ 
-        assert((0 <= n) && (n < rowLength * rowLength)); 
-        int offset = (n / rowLength * matrixLength) + (n % rowLength);
-        return (firstNum + offset); 
+
+    void printElts(){ 
+        for (int i = 0; i < rowLength * rowLength; ++i){ 
+            std::cout << *elt(i) << "\n"; 
+        }
     }
 }; 
 
@@ -59,7 +66,7 @@ int* createNewArray(int n){
 Matrix addMatrix(Matrix m1, Matrix m2, bool isAddition = true, Matrix resultMatrix = Matrix(nullptr, 0, 0)){ 
     if (resultMatrix.firstNum == nullptr){ 
         int* resultArray = createNewArray(m1.matrixLength * m1.matrixLength); 
-        resultMatrix = Matrix(resultArray, m1.rowLength, m1.matrixLength); 
+        resultMatrix = Matrix(resultArray, m1.rowLength, m1.rowLength); 
     }
     for (int i = 0; i < m1.rowLength * m1.rowLength; ++i){ 
         int sum; 
@@ -74,17 +81,15 @@ Matrix addMatrix(Matrix m1, Matrix m2, bool isAddition = true, Matrix resultMatr
     return resultMatrix;
 };
 
-// void addMatrices(Matrix resultMatrix, Matrix intermediates[], int indices[]){ 
-//     return; 
-// }
 // multiplies two matrices and stores the result in a new matrix 
 Matrix multiplyStrassen(Matrix m1, Matrix m2){
     // base case 
     Matrix* matrix; 
+    int* resultArray = createNewArray(m1.matrixLength * m1.matrixLength); 
     if (m1.rowLength == 1 && m2.rowLength == 1){ 
         // multiply two matrices and store product in m1 
-        *(m1.firstNum) = *(m1.firstNum) * *(m2.firstNum); 
-        return Matrix(m2.firstNum, m1.rowLength, m1.matrixLength); 
+        *(resultArray) = *(m1.firstNum) * *(m2.firstNum); 
+        return Matrix(resultArray, m1.rowLength, m1.matrixLength); 
     } 
     else{ 
         Matrix FH = addMatrix(m2.block(1), m2.block(3), false); 
@@ -93,7 +98,7 @@ Matrix multiplyStrassen(Matrix m1, Matrix m2){
         Matrix GE = addMatrix(m2.block(2), m2.block(0), false); 
         Matrix AD = addMatrix(m1.block(0), m1.block(3)); 
         Matrix EH = addMatrix(m2.block(0), m2.block(3)); 
-        Matrix BD = addMatrix(m1.block(0), m1.block(3), false); 
+        Matrix BD = addMatrix(m1.block(1), m1.block(3), false); 
         Matrix GH = addMatrix(m2.block(2), m2.block(3)); 
         Matrix AC = addMatrix(m1.block(0), m1.block(2), false); 
         Matrix EF = addMatrix(m2.block(0), m2.block(1)); 
@@ -106,20 +111,22 @@ Matrix multiplyStrassen(Matrix m1, Matrix m2){
         intermediates[5] = multiplyStrassen(BD, GH);
         intermediates[6] = multiplyStrassen(AC, EF);
 
-        int* resultArray = createNewArray(m1.matrixLength * m1.matrixLength); 
-        Matrix resultMatrix = Matrix(resultArray, m1.rowLength, m1.matrixLength); 
+        Matrix* resultMatrix = new Matrix(resultArray, m1.rowLength, m1.matrixLength); 
 
-        addMatrix(intermediates[4], intermediates[3], true, resultMatrix.block(0)); 
-        addMatrix(resultMatrix.block(0), intermediates[1], false, resultMatrix.block(0)); 
-        addMatrix(resultMatrix.block(0), intermediates[5], true, resultMatrix.block(0));
+        addMatrix(intermediates[4], intermediates[3], true, resultMatrix->block(0)); 
+        addMatrix(resultMatrix->block(0), intermediates[1], false, resultMatrix->block(0)); 
+        addMatrix(resultMatrix->block(0), intermediates[5], true, resultMatrix->block(0));
         
-        addMatrix(intermediates[0], intermediates[1], true, resultMatrix.block(1)); 
-        addMatrix(intermediates[2], intermediates[3], true, resultMatrix.block(2));
+        addMatrix(intermediates[0], intermediates[1], true, resultMatrix->block(1)); 
+        addMatrix(intermediates[2], intermediates[3], true, resultMatrix->block(2));
 
-        addMatrix(intermediates[4], intermediates[0], true, resultMatrix.block(3)); 
-        addMatrix(resultMatrix.block(3), intermediates[2], false, resultMatrix.block(3)); 
-        addMatrix(resultMatrix.block(3), intermediates[6], false, resultMatrix.block(3)); 
-        return resultMatrix; 
+        addMatrix(intermediates[4], intermediates[0], true, resultMatrix->block(3)); 
+        addMatrix(resultMatrix->block(3), intermediates[2], false, resultMatrix->block(3)); 
+        addMatrix(resultMatrix->block(3), intermediates[6], false, resultMatrix->block(3)); 
+    // for (int i = 0; i < 4; ++i){ 
+    //     std::cout << *(resultMatrix.elt(i)) << "\n"; 
+    // }
+        return *resultMatrix; 
     }
 }; 
 
@@ -143,11 +150,9 @@ int main(){
         matrixPtr2++; 
     } 
 
-    Matrix matrixStruct = Matrix(matrix, 4, 4); 
+    Matrix matrixStruct = Matrix(matrix, 4, 4);
     Matrix matrixStruct2 = Matrix(matrix2, 4, 4); 
     Matrix resMatrix = multiplyStrassen(matrixStruct, matrixStruct2); 
-    for (int i = 0; i < 16; ++i){ 
-        std::cout << *(resMatrix.elt(i)) << "\n"; 
-    }
+    resMatrix.printElts(); 
 }
 
