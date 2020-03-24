@@ -139,6 +139,17 @@ Matrix multiplyStrassen(Matrix m1, Matrix m2){
     }
 }; 
 
+Matrix 2DArrayToMatrix(int** arr, int dimension){ 
+    int* flattenedArray = new int[dimension * dimension]; 
+    int currElt = 0; 
+    for (int i = 0; i < dimension; ++i){ 
+        for (int j = 0; j < dimension; ++j){ 
+            flattenedArray[currElt] = arr[i][j]; 
+        }
+    }
+    return Matrix(flattenedArray, dimension, dimension); 
+
+}
 // multiplies matrices using conventional method and returns product matrix
 int** multConv(Matrix m1, Matrix m2){
     int N = m1.matrixLength;
