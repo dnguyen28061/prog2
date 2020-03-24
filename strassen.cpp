@@ -168,8 +168,14 @@ int** multConv(Matrix m1, Matrix m2){
     return resMatrix;
 };
 
-
-
+// Creates a random graph of edges with probability p
+Matrix createRandGraph(int p){
+    int* coords = new int[1024];
+    int* coordsPtr = coords;
+    for (int i = 0; i < 1024; i++){
+        *coordsPtr = 
+    }
+}
 
 int main(int argc, char** argv){ 
     if (argc != 4) {
@@ -213,4 +219,3 @@ int main(int argc, char** argv){
     delete[] resMatrix.firstNum; 
     file.close();  
 }
-
