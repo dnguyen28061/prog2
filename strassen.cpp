@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <iostream> 
 #include <cassert> 
+#include <fstream> 
+#include <string>
+#include<chrono> 
 
 struct Matrix{
     public: 
@@ -15,6 +18,7 @@ struct Matrix{
     
     // For a matrix of 
     int* elt(int n){ 
+        // std::cout << n << "\n";
         assert((0 <= n) && (n < rowLength * rowLength)); 
         int offset = (n / rowLength * matrixLength) + (n % rowLength);
         return (firstNum + offset); 
@@ -123,6 +127,7 @@ Matrix multiplyStrassen(Matrix m1, Matrix m2){
         addMatrix(resultMatrix.block(3), intermediates[2], false, resultMatrix.block(3)); 
         addMatrix(resultMatrix.block(3), intermediates[6], false, resultMatrix.block(3)); 
 
+        // 
         Matrix matricesToDelete[17] = {FH, AB, CD, GE, AD, EH, BD, GH, AC, EF}; 
         for(int j = 10; j < 17; ++j){ 
             matricesToDelete[j] = intermediates[j-10]; 
@@ -161,38 +166,45 @@ Matrix createRandGraph(int p){
     }
 }
 
-int main(){ 
-    int* matrix = new int[16];
-    int* matrixPtr = matrix; 
-    for(int i = 0; i < 16; ++i){ 
-        *matrixPtr = rand() % 10; 
-        matrixPtr++; 
-    } 
-    int* matrix2 = new int[16];
-    int* matrixPtr2 = matrix2; 
-    for(int i = 0; i < 16; ++i){ 
-        *matrixPtr2 = rand() % 10; 
-        matrixPtr2++; 
-    } 
-
-    Matrix matrixStruct = Matrix(matrix, 4, 4);
-    Matrix matrixStruct2 = Matrix(matrix2, 4, 4); 
-    matrixStruct.printElts(); 
-    std::cout << "\n"; 
-    matrixStruct2.printElts(); 
-    Matrix resMatrix = multiplyStrassen(matrixStruct, matrixStruct2); 
-    int** convRes = multConv(matrixStruct, matrixStruct2);
-    std::cout << "\n";
-    resMatrix.printElts();
-    for (int i = 0; i < matrixStruct.matrixLength; i++) 
-    { 
-        for (int j = 0; j < matrixStruct.matrixLength; j++) 
-        std::cout << convRes[i][j] << " "; 
-        std::cout << "\n"; 
+int main(int argc, char** argv){ 
+    if (argc != 4) {
+        throw std::invalid_argument("Usage: ./strassen 0 dimension inputfile");
     }
-    resMatrix.printElts(); 
-    delete[] matrix; 
-    delete[] matrix2;
-    delete[] resMatrix.firstNum; 
-}
+    int dimension = atoi(argv[2]); 
+    int* matrix_1 = new int[dimension * dimension]; 
+    int* matrix_2 = new int[dimension * dimension]; 
+    std::ifstream file(argv[3], std::ios::in);
+    for (int i = 0; i < dimension * dimension; ++i){ 
+        std::string numb; 
+        std::getline(file, numb); 
+        matrix_1[i] = atoi(numb.c_str()); 
+    }
+    for (int j = 0; j < dimension * dimension; ++j){ 
+        std::string numb; 
+        std::getline(file, numb); 
+        matrix_2[j] = atoi(numb.c_str()); 
+    }
 
+    Matrix matrixStruct = Matrix(matrix_1, dimension, dimension);
+    Matrix matrixStruct2 = Matrix(matrix_2, dimension, dimension); 
+    auto start = std::chrono::high_resolution_clock::now(); 
+    Matrix resMatrix = multiplyStrassen(matrixStruct, matrixStruct2); 
+    auto end = std::chrono::high_resolution_clock::now(); 
+    int** convRes = multConv(matrixStruct, matrixStruct2);
+    auto endConventional = std::chrono::high_resolution_clock::now(); 
+    std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::milliseconds>(end - start)).count() << "\n"; 
+    std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::milliseconds>(endConventional - end)).count() << "\n"; 
+    // std::cout << "\n";
+    // // resMatrix.printElts();
+    // for (int i = 0; i < matrixStruct.matrixLength; i++) 
+    // { 
+    //     for (int j = 0; j < matrixStruct.matrixLength; j++) 
+    //     std::cout << convRes[i][j] << " "; 
+    //     std::cout << "\n"; 
+    // }
+    // resMatrix.printElts(); 
+    delete[] matrix_1; 
+    delete[] matrix_2;
+    delete[] resMatrix.firstNum; 
+    file.close();  
+}
