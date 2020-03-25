@@ -51,7 +51,10 @@ struct Matrix{
 
     void printElts(){ 
         for (int i = 0; i < rowLength * rowLength; ++i){ 
-            std::cout << *elt(i) << "\n"; 
+            std::cout << *elt(i) << " ";
+            if (i % rowLength == rowLength - 1){
+                std::cout << "\n";
+            } 
         }
     }
 }; 
@@ -86,16 +89,19 @@ Matrix addMatrix(Matrix m1, Matrix m2, bool isAddition = true, Matrix resultMatr
 };
 
 // multiplies two matrices and stores the result in a new matrix 
-Matrix multiplyStrassen(Matrix m1, Matrix m2){
+int* multConv(Matrix m1, Matrix m2); 
+Matrix multiplyStrassen(Matrix m1, Matrix m2, int n0){
+    assert(m1.rowLength = m2.rowLength); 
     // base case 
     Matrix* matrix; 
-    int* resultArray = createNewArray(m1.matrixLength * m1.matrixLength); 
-    if (m1.rowLength == 1 && m2.rowLength == 1){ 
+    int* resultArray; 
+    if (m1.rowLength <= n0){ 
         // multiply two matrices and store product in m1 
-        *(resultArray) = *(m1.firstNum) * *(m2.firstNum); 
-        return Matrix(resultArray, m1.rowLength, m1.matrixLength); 
+        resultArray = multConv(m1, m2); 
+        return Matrix(resultArray, m1.rowLength, m1.rowLength); 
     } 
     else{ 
+        resultArray = createNewArray(m1.matrixLength * m1.matrixLength); 
         Matrix FH = addMatrix(m2.block(1), m2.block(3), false); 
         Matrix AB = addMatrix(m1.block(0), m1.block(1)); 
         Matrix CD = addMatrix(m1.block(2), m1.block(3)); 
@@ -107,13 +113,13 @@ Matrix multiplyStrassen(Matrix m1, Matrix m2){
         Matrix AC = addMatrix(m1.block(0), m1.block(2), false); 
         Matrix EF = addMatrix(m2.block(0), m2.block(1)); 
         Matrix intermediates[7]; 
-        intermediates[0] = multiplyStrassen(m1.block(0), FH); 
-        intermediates[1] = multiplyStrassen(AB, m2.block(3));
-        intermediates[2] = multiplyStrassen(CD, m2.block(0));
-        intermediates[3] = multiplyStrassen(m1.block(3), GE);
-        intermediates[4] = multiplyStrassen(AD, EH);
-        intermediates[5] = multiplyStrassen(BD, GH);
-        intermediates[6] = multiplyStrassen(AC, EF);
+        intermediates[0] = multiplyStrassen(m1.block(0), FH, n0); 
+        intermediates[1] = multiplyStrassen(AB, m2.block(3), n0);
+        intermediates[2] = multiplyStrassen(CD, m2.block(0), n0);
+        intermediates[3] = multiplyStrassen(m1.block(3), GE, n0);
+        intermediates[4] = multiplyStrassen(AD, EH, n0);
+        intermediates[5] = multiplyStrassen(BD, GH, n0);
+        intermediates[6] = multiplyStrassen(AC, EF, n0);
 
         Matrix resultMatrix = Matrix(resultArray, m1.rowLength, m1.matrixLength); 
 
@@ -140,9 +146,21 @@ Matrix multiplyStrassen(Matrix m1, Matrix m2){
     }
 }; 
 
+int* returnOneDArray(int** arr, int dimension){ 
+    int* flattenedArray = createNewArray(dimension*dimension); 
+    int currElt = 0; 
+    for (int i = 0; i < dimension; ++i){ 
+        for (int j = 0; j < dimension; ++j){ 
+            flattenedArray[currElt] = arr[i][j]; 
+            currElt += 1; 
+        }
+    }
+    return flattenedArray; 
+
+}
 // multiplies matrices using conventional method and returns product matrix
-int** multConv(Matrix m1, Matrix m2){
-    int N = m1.matrixLength;
+int* multConv(Matrix m1, Matrix m2){
+    int N = m1.rowLength;
     int** resMatrix = 0;
     resMatrix = new int*[N];
     int i, j, k; 
@@ -155,7 +173,12 @@ int** multConv(Matrix m1, Matrix m2){
             }
         }
     }
-    return resMatrix;
+    int* oneDimMatrix = returnOneDArray(resMatrix, N); 
+    for (int i = 0; i < N; ++i){ 
+        delete[] resMatrix[i]; 
+    }
+    delete[] resMatrix; 
+    return oneDimMatrix;
 };
 
 // Creates a random graph of edges with probability p
@@ -226,8 +249,8 @@ int main(int argc, char** argv){
         throw std::invalid_argument("Usage: ./strassen 0 dimension inputfile");
     }
     int dimension = atoi(argv[2]); 
-    int* matrix_1 = new int[dimension * dimension]; 
-    int* matrix_2 = new int[dimension * dimension]; 
+    int* matrix_1 = createNewArray(dimension * dimension); 
+    int* matrix_2 = createNewArray(dimension * dimension); 
     std::ifstream file(argv[3], std::ios::in);
     for (int i = 0; i < dimension * dimension; ++i){ 
         std::string numb; 
@@ -243,12 +266,12 @@ int main(int argc, char** argv){
     Matrix matrixStruct = Matrix(matrix_1, dimension, dimension);
     Matrix matrixStruct2 = Matrix(matrix_2, dimension, dimension); 
     auto start = std::chrono::high_resolution_clock::now(); 
-    Matrix resMatrix = multiplyStrassen(matrixStruct, matrixStruct2); 
+    Matrix resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 8); 
     auto end = std::chrono::high_resolution_clock::now(); 
-    int** convRes = multConv(matrixStruct, matrixStruct2);
+    int* convRes = multConv(matrixStruct, matrixStruct2);
     auto endConventional = std::chrono::high_resolution_clock::now(); 
-    std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::milliseconds>(end - start)).count() << "\n"; 
-    std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::milliseconds>(endConventional - end)).count() << "\n"; 
+    std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
+    std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
     // std::cout << "\n";
     // // resMatrix.printElts();
     // for (int i = 0; i < matrixStruct.matrixLength; i++) 
@@ -257,7 +280,7 @@ int main(int argc, char** argv){
     //     std::cout << convRes[i][j] << " "; 
     //     std::cout << "\n"; 
     // }
-    // resMatrix.printElts(); 
+    resMatrix.printElts(); 
 
     int comb = nCr(1024, 3);
     // Compute number of triangles for each prob p
@@ -271,5 +294,6 @@ int main(int argc, char** argv){
     delete[] matrix_1; 
     delete[] matrix_2;
     delete[] resMatrix.firstNum; 
+    delete[] convRes;
     file.close();  
 }
