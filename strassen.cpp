@@ -275,7 +275,7 @@ int main(int argc, char** argv){
     std::ifstream file(argv[3], std::ios::in);
     readFileIntoArray(&file, dimension, matrixStruct, isOddDimension);
     readFileIntoArray(&file, dimension, matrixStruct2, isOddDimension);
-    
+
     auto start = std::chrono::high_resolution_clock::now(); 
     Matrix resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 1); 
     auto end = std::chrono::high_resolution_clock::now(); 
