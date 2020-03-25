@@ -10,6 +10,8 @@ struct Matrix{
     int* firstNum; 
     int rowLength; 
     int matrixLength; 
+    int* numsInPadding; 
+    bool padded; 
     Matrix(int* numbers = nullptr, int blockRows = 0, int matrixRows = 0){ 
         this->firstNum = numbers;
         this->rowLength = blockRows; 
@@ -18,8 +20,7 @@ struct Matrix{
     
     // For a matrix of 
     int* elt(int n){ 
-        // std::cout << n << "\n";
-        assert((0 <= n) && (n < rowLength * rowLength)); 
+        // assert((0 <= n) && (n < rowLength * rowLength)); 
         int offset = (n / rowLength * matrixLength) + (n % rowLength);
         return (firstNum + offset); 
     }
@@ -44,10 +45,42 @@ struct Matrix{
 
     // returns element at ith row and jth column
     int* rowCol(int i, int j){
-        assert((0 <= i) && (0 <= j) && (i < rowLength) && (j < rowLength));
+        // assert((0 <= i) && (0 <= j) && (i < rowLength) && (j < rowLength));
         return elt((rowLength * i) + j);
     }
 
+    void pad(){ 
+        assert(rowLength % 2 == 1); 
+        rowLength += 1; 
+        padded = true; 
+        numsInPadding = new int[rowLength + rowLength]; 
+        int currElt = 0; 
+        for (int i = 0; i < rowLength; ++i){ 
+            std::cout << i << " " << rowLength << "\n"; 
+            std::cout << *(rowCol(i, rowLength)) << "\n"; 
+            numsInPadding[currElt] = *(rowCol(i, rowLength)); 
+            currElt++; 
+            *(rowCol(i, rowLength)) = 0; 
+            numsInPadding[currElt] = *(rowCol(rowLength, i)); 
+            currElt++; 
+            *(rowCol(rowLength, i)) = 0; 
+        }
+    }
+
+    void unpad(){ 
+        // std::cout << "rowlength: " << rowLength << "\n";
+        padded = false; 
+        assert(rowLength % 2 == 0); 
+        int currElt = 0; 
+        for (int i = 0; i < rowLength; ++i){ 
+            *(rowCol(i, rowLength)) = numsInPadding[currElt]; 
+            currElt++; 
+            *(rowCol(rowLength, i)) = numsInPadding[currElt]; 
+            currElt++; 
+        }
+        delete[] numsInPadding; 
+        rowLength -= 1; 
+    }
     void printElts(){ 
         for (int i = 0; i < rowLength * rowLength; ++i){ 
             std::cout << *elt(i) << " ";
@@ -59,10 +92,15 @@ struct Matrix{
 }; 
 
 //creates dynamically sized array of size n, initializes it to 0, and returns a pointer to that object 
-int* createNewArray(int n){ 
-    int* newArray = new int[n]; 
+
+int* createNewArray(int dimension){ 
+    if (dimension % 2 == 1){ 
+        dimension++; 
+    }
+    int* newArray = new int[dimension * dimension]; 
     int* newArrayPointer = newArray; 
-    for (int i = 0; i < n; ++i){ 
+
+    for (int i = 0; i < dimension * dimension; ++i){ 
         *newArrayPointer = 0; 
         newArrayPointer++; 
     }
@@ -71,7 +109,7 @@ int* createNewArray(int n){
 // adds two matrices and stores them in resMatrix. Allocates new matrix if it does not exist. 
 Matrix addMatrix(Matrix m1, Matrix m2, bool isAddition = true, Matrix resultMatrix = Matrix(nullptr, 0, 0)){ 
     if (resultMatrix.firstNum == nullptr){ 
-        int* resultArray = createNewArray(m1.matrixLength * m1.matrixLength); 
+        int* resultArray = createNewArray(m1.matrixLength); 
         resultMatrix = Matrix(resultArray, m1.rowLength, m1.rowLength); 
     }
     for (int i = 0; i < m1.rowLength * m1.rowLength; ++i){ 
@@ -100,7 +138,14 @@ Matrix multiplyStrassen(Matrix m1, Matrix m2, int n0){
         return Matrix(resultArray, m1.rowLength, m1.rowLength); 
     } 
     else{ 
-        resultArray = createNewArray(m1.matrixLength * m1.matrixLength); 
+        if(m1.rowLength % 2 == 1){ 
+            m1.pad(); 
+            m2.pad(); 
+            m1.printElts(); 
+            m2.printElts(); 
+            std::cout << "padded"; 
+        }
+        resultArray = createNewArray(m1.matrixLength); 
         Matrix FH = addMatrix(m2.block(1), m2.block(3), false); 
         Matrix AB = addMatrix(m1.block(0), m1.block(1)); 
         Matrix CD = addMatrix(m1.block(2), m1.block(3)); 
@@ -141,12 +186,17 @@ Matrix multiplyStrassen(Matrix m1, Matrix m2, int n0){
         for (int i = 0; i < 17; ++i){ 
             delete[] matricesToDelete[i].firstNum; 
         }
+        if (m1.padded == true && m2.padded == true){ 
+            m1.unpad();
+            m2.unpad(); 
+        }
         return resultMatrix; 
     }
 }; 
 
+
 int* returnOneDArray(int** arr, int dimension){ 
-    int* flattenedArray = createNewArray(dimension*dimension); 
+    int* flattenedArray = createNewArray(dimension); 
     int currElt = 0; 
     for (int i = 0; i < dimension; ++i){ 
         for (int j = 0; j < dimension; ++j){ 
@@ -173,6 +223,9 @@ int* multConv(Matrix m1, Matrix m2){
         }
     }
     int* oneDimMatrix = returnOneDArray(resMatrix, N); 
+    // for (int i = 0; i < N * N; ++i){ 
+    //     std::cout << oneDimMatrix[i] << "\n"; 
+    // }
     for (int i = 0; i < N; ++i){ 
         delete[] resMatrix[i]; 
     }
@@ -189,42 +242,47 @@ int* multConv(Matrix m1, Matrix m2){
 //     }
 // }
 
+void readFileIntoArray(std::ifstream* file, int dimension, Matrix matrix, bool isOdd){ 
+    for (int i = 0; i < dimension; ++i){ 
+        for (int j = 0; j < dimension; ++j){ 
+            if (isOdd && (i == dimension - 1 || j == dimension - 1)){
+                *matrix.rowCol(i, j) = 0; 
+            }
+            else{
+                std::string numb; 
+                std::getline(*file, numb); 
+                *matrix.rowCol(i, j) = atoi(numb.c_str()); 
+            }
+        }
+    }
+}
+
 int main(int argc, char** argv){ 
     if (argc != 4) {
         throw std::invalid_argument("Usage: ./strassen 0 dimension inputfile");
     }
     int dimension = atoi(argv[2]); 
-    int* matrix_1 = createNewArray(dimension * dimension); 
-    int* matrix_2 = createNewArray(dimension * dimension); 
-    std::ifstream file(argv[3], std::ios::in);
-    for (int i = 0; i < dimension * dimension; ++i){ 
-        std::string numb; 
-        std::getline(file, numb); 
-        matrix_1[i] = atoi(numb.c_str()); 
+    int* matrix_1 = createNewArray(dimension); 
+    int* matrix_2 = createNewArray(dimension); 
+    bool isOddDimension = false; 
+    if(dimension % 2 == 1){ 
+        dimension += 1; 
+        isOddDimension = true; 
     }
-    for (int j = 0; j < dimension * dimension; ++j){ 
-        std::string numb; 
-        std::getline(file, numb); 
-        matrix_2[j] = atoi(numb.c_str()); 
-    }
-
     Matrix matrixStruct = Matrix(matrix_1, dimension, dimension);
     Matrix matrixStruct2 = Matrix(matrix_2, dimension, dimension); 
+
+    std::ifstream file(argv[3], std::ios::in);
+    readFileIntoArray(&file, dimension, matrixStruct, isOddDimension);
+    readFileIntoArray(&file, dimension, matrixStruct2, isOddDimension);
+    
     auto start = std::chrono::high_resolution_clock::now(); 
-    Matrix resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 8); 
+    Matrix resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 1); 
     auto end = std::chrono::high_resolution_clock::now(); 
     int* convRes = multConv(matrixStruct, matrixStruct2);
     auto endConventional = std::chrono::high_resolution_clock::now(); 
     std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
     std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
-    // std::cout << "\n";
-    // // resMatrix.printElts();
-    // for (int i = 0; i < matrixStruct.matrixLength; i++) 
-    // { 
-    //     for (int j = 0; j < matrixStruct.matrixLength; j++) 
-    //     std::cout << convRes[i][j] << " "; 
-    //     std::cout << "\n"; 
-    // }
     resMatrix.printElts();
     delete[] matrix_1; 
     delete[] matrix_2;
