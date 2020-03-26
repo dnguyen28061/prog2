@@ -253,12 +253,20 @@ int* multConv(Matrix* m1, Matrix* m2){
     int N = m1->rowLength;
     int** resMatrix = 0;
     resMatrix = new int*[N];
-    int i, j, k; 
-    for (j = 0; j < N; j++){ 
-        resMatrix[j] = new int[N];
-        for (i = 0; i < N; i++){ 
-            resMatrix[i][j] = 0;
-            for (k = 0; k < N; k++){
+    for (int i = 0; i < N; ++i){ 
+        resMatrix[i] = new int[N]; 
+    }
+    for (int i = 0; i < N; ++i){ 
+        for(int j = 0; j < N; ++j){ 
+            resMatrix[i][j] = 0; 
+        }
+    }
+    // int i, j, k; 
+    for (int i = 0; i < N; i++){ 
+        // resMatrix[j] = new int[N];
+        for (int k = 0; k < N; k++){ 
+
+            for (int j = 0; j < N; j++){
                 resMatrix[i][j] += *(m1->rowCol(i,k)) * *(m2->rowCol(k,j));
             }
         }
@@ -367,8 +375,8 @@ int main(int argc, char** argv){
     delete[] matrix_2; 
     delete matrixStruct; 
     delete matrixStruct2;
-    delete[] resMatrix->firstNum; 
-    delete resMatrix; 
+    // delete[] resMatrix->firstNum; 
+    // delete resMatrix; 
     delete[] convRes;
  
 
