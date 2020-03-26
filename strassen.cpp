@@ -221,14 +221,6 @@ Matrix* multiplyStrassen(Matrix* m1, Matrix* m2, int n0){
             m2->unpad(); 
             resultMatrix->unpad(); 
         }
-        Matrix* matricesToDelete[17] = {FH, AB, CD, GE, AD, EH, BD, GH, AC, EF}; 
-        for(int j = 10; j < 17; ++j){ 
-            matricesToDelete[j] = intermediates[j-10]; 
-        }
-        // for (int i = 0; i < 17; ++i){ 
-        //     delete[] matricesToDelete[i]->firstNum; 
-        //     delete matricesToDelete[i]; 
-        // }
         return resultMatrix; 
     }
 };
@@ -361,12 +353,8 @@ int main(int argc, char** argv){
         int exp = comb * pow(p,3);
         std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
     }
-    delete[] matrix_1; 
-    delete[] matrix_2;
-    delete matrixStruct;
-    delete matrixStruct2;
-    delete[] resMatrix->firstNum; 
-    delete resMatrix; 
+    delete[] matrix_1;
+    delete[] matrix_2; 
     delete[] convRes;
  
 
