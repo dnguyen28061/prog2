@@ -29,11 +29,15 @@ struct Matrix{
         this-> zeroForPadding = new int; 
         *zeroForPadding = 0; 
     };
-    // ~Matrix(){
-    //     for(int i = 0; i < 4; ++i){ 
-    //         delete blocks[i]; 
-    //     }
-    // }
+    ~Matrix(){
+        for(int i = 0; i < 4; ++i){ 
+            if (blocks[i] != nullptr){
+            delete blocks[i]; 
+            }
+        }
+        delete zeroForPadding; 
+        delete this; 
+    };
     
     // For a matrix of 
     private: 
@@ -55,7 +59,7 @@ struct Matrix{
         else{ 
             return elt((rowLength * i) + j);
         }
-    }
+    };
     private: 
     int getPadding(int firstRow, int StartOfPadding){ 
         // if padding is in the elements of the matrix. 
@@ -128,23 +132,11 @@ struct Matrix{
         assert(rowLength % 2 == 0); 
         rowLength -= 1; 
     }
-    
-    // void unpad(){ 
-    //     assert(rowLength % 2 == 0); 
-    //     for (int i = 0; i < rowLength; ++i){ 
-    //         std::cout << rowLength << "\n";
-    //         *(rowCol(i, rowLength - 1)) = *(paddedNums->rowCol(i, rowLength - 1)); 
-    //         *(rowCol(rowLength - 1, i)) = *(paddedNums->rowCol(rowLength - 1, i));
-    //     }
-    //     delete[] paddedNums->firstNum; 
-    //     delete paddedNums; 
-    //     rowLength -= 1; 
-    // }
 }; 
 
 //creates dynamically sized array of size n, initializes it to 0, and returns a pointer to that object 
 
-int* createNewArray(int dimension, int d){ 
+int* createNewArray(int dimension){ 
     int* newArray = new int[dimension * dimension]; 
     int* newArrayPointer = newArray; 
 
@@ -176,7 +168,7 @@ Matrix* addMatrix(Matrix* m1, Matrix* m2, bool isAddition = true, Matrix* result
 };
 
 // multiplies two matrices and stores the result in a new matrix 
-int* multConv(Matrix* m1, Matrix* m2); 
+int* multConv(Matrix*, Matrix*); 
 Matrix* multiplyStrassen(Matrix* m1, Matrix* m2, int n0){
     assert(m1->rowLength = m2->rowLength); 
     // base case 
@@ -195,7 +187,6 @@ Matrix* multiplyStrassen(Matrix* m1, Matrix* m2, int n0){
             m2->pad(); 
             resultMatrix->pad(); 
         }
-
         Matrix* FH = addMatrix(m2->block(1), m2->block(3), false); 
         Matrix* AB = addMatrix(m1->block(0), m1->block(1)); 
         Matrix* CD = addMatrix(m1->block(2), m1->block(3)); 
@@ -230,17 +221,17 @@ Matrix* multiplyStrassen(Matrix* m1, Matrix* m2, int n0){
             m2->unpad(); 
             resultMatrix->unpad(); 
         }
-        // Matrix* matricesToDelete[17] = {FH, AB, CD, GE, AD, EH, BD, GH, AC, EF}; 
-        // for(int j = 10; j < 17; ++j){ 
-        //     matricesToDelete[j] = intermediates[j-10]; 
-        // }
+        Matrix* matricesToDelete[17] = {FH, AB, CD, GE, AD, EH, BD, GH, AC, EF}; 
+        for(int j = 10; j < 17; ++j){ 
+            matricesToDelete[j] = intermediates[j-10]; 
+        }
         // for (int i = 0; i < 17; ++i){ 
         //     delete[] matricesToDelete[i]->firstNum; 
         //     delete matricesToDelete[i]; 
         // }
         return resultMatrix; 
     }
-}; 
+};
 
 
 int* returnOneDArray(int** arr, int dimension){ 
@@ -254,7 +245,7 @@ int* returnOneDArray(int** arr, int dimension){
     }
     return flattenedArray; 
 
-}
+};
 // multiplies matrices using conventional method and returns product matrix
 int* multConv(Matrix* m1, Matrix* m2){
     int N = m1->rowLength;
@@ -271,37 +262,34 @@ int* multConv(Matrix* m1, Matrix* m2){
         }
     }
     int* oneDimMatrix = returnOneDArray(resMatrix, N); 
-    // for (int i = 0; i < N * N; ++i){ 
-    //     std::cout << oneDimMatrix[i] << "\n"; 
-    // }
     for (int i = 0; i < N; ++i){ 
         delete[] resMatrix[i]; 
     }
     delete[] resMatrix; 
     return oneDimMatrix;
-};
+}
 
 // Creates a random graph of edges with probability p
-Matrix createRandGraph(double p){
+Matrix* createRandGraph(double p){
     int* coords = new int[1024 * 1024];
     int* coordsPtr = coords;
-    Matrix randGraph = Matrix(coordsPtr, 1024, 1024);
+    Matrix* randGraph = new Matrix(coordsPtr, 1024, 1024);
     int edgeProb;
     for (int i = 0; i < 1024 * 1024; ++i){ 
         coords[i] = -1; 
     }
     for (int i = 0; i < 1024; i++){
         for (int j = 0; j < 1024; j++){
-            if (*randGraph.rowCol(j,i) != -1){
-                *randGraph.rowCol(i,j) = *randGraph.rowCol(j,i);
+            if (*randGraph->rowCol(j,i) != -1){
+                *randGraph->rowCol(i,j) = *randGraph->rowCol(j,i);
             }
             else{
                 edgeProb = (rand() % 100) + 1;
                 if (edgeProb <= p * 100.){
-                    *randGraph.rowCol(i,j) = 1;
+                    *randGraph->rowCol(i,j) = 1;
                 }
                 else{
-                    *randGraph.rowCol(i,j) = 0;
+                    *randGraph->rowCol(i,j) = 0;
                 }
             }
         }
@@ -312,12 +300,12 @@ Matrix createRandGraph(double p){
 int numOfTriangles(double p){
     int avgTriangles = 0;
     for (int i = 0; i < 5; i++){
-        Matrix A = createRandGraph(p);
-        Matrix A2 = multiplyStrassen(A, A, 8);
-        Matrix A3 = multiplyStrassen(A2, A, 8);
+        Matrix* A = createRandGraph(p);
+        Matrix* A2 = multiplyStrassen(A, A, 8);
+        Matrix* A3 = multiplyStrassen(A2, A, 8);
         int numTriangles = 0;
         for (int j = 0; j < 1024; j++){
-            numTriangles += *A3.rowCol(j,j);
+            numTriangles += *A3->rowCol(j,j);
         }
         numTriangles /= 6;
         avgTriangles += numTriangles;
@@ -328,7 +316,7 @@ int numOfTriangles(double p){
 }
 
 // Returns n choose r
-int fact(int n); 
+int fact(int); 
 int nCr(int n, int r) 
 { 
     return fact(n) / (fact(r) * fact(n - r)); 
@@ -368,37 +356,27 @@ int main(int argc, char** argv){
     readFileIntoArray(&file, dimension, matrixStruct2);
     file.close(); 
     auto start = std::chrono::high_resolution_clock::now(); 
-    Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 1); 
+    Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 15); 
     auto end = std::chrono::high_resolution_clock::now(); 
     int* convRes = multConv(matrixStruct, matrixStruct2);
     auto endConventional = std::chrono::high_resolution_clock::now();
-    resMatrix.printElts();
     std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
     std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
     resMatrix->printElts(); 
-
-    // std::cout << "\n";
-    // // resMatrix.printElts();
-    // for (int i = 0; i < matrixStruct.matrixLength; i++) 
-    // { 
-    //     for (int j = 0; j < matrixStruct.matrixLength; j++) 
-    //     std::cout << convRes[i][j] << " "; 
-    //     std::cout << "\n"; 
+    // int comb = nCr(1024, 3);
+    // // Compute number of triangles for each prob p
+    // for (int i = 1; i < 6; i++){
+    //     const double p = i / 100.;
+    //     numOfTriangles(p);
+    //     int exp = comb * pow(p,3);
+    //     std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
     // }
-    // resMatrix.printElts(); 
-
-    int comb = nCr(1024, 3);
-    // Compute number of triangles for each prob p
-    for (int i = 1; i < 6; i++){
-        const double p = i / 100.;
-        numOfTriangles(p);
-        int exp = comb * pow(p,3);
-        std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
-    }
-
     delete[] matrix_1; 
     delete[] matrix_2;
+    delete matrixStruct;
+    delete matrixStruct2;
     delete[] resMatrix->firstNum; 
+    delete resMatrix; 
     delete[] convRes;
  
 
