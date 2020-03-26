@@ -244,9 +244,9 @@ int* multConv(Matrix* m1, Matrix* m2){
     int** resMatrix = 0;
     resMatrix = new int*[N];
     int i, j, k; 
-    for (i = 0; i < N; i++){ 
-        resMatrix[i] = new int[N];
-        for (j = 0; j < N; j++){ 
+    for (j = 0; j < N; j++){ 
+        resMatrix[j] = new int[N];
+        for (i = 0; i < N; i++){ 
             resMatrix[i][j] = 0;
             for (k = 0; k < N; k++){
                 resMatrix[i][j] += *(m1->rowCol(i,k)) * *(m2->rowCol(k,j));
@@ -338,21 +338,21 @@ int main(int argc, char** argv){
     readFileIntoArray(&file, dimension, matrixStruct2);
     file.close(); 
     auto start = std::chrono::high_resolution_clock::now(); 
-    Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 15); 
+    // Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 15); 
     auto end = std::chrono::high_resolution_clock::now(); 
     int* convRes = multConv(matrixStruct, matrixStruct2);
     auto endConventional = std::chrono::high_resolution_clock::now();
-    std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
+    // std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
     std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
-    resMatrix->printElts(); 
-    int comb = (1024 * 1023 * 1022) / 6;
-    // Compute number of triangles for each prob p
-    for (int i = 1; i < 6; i++){
-        const double p = i / 100.;
-        numOfTriangles(p);
-        int exp = comb * pow(p,3);
-        std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
-    }
+    // resMatrix->printElts(); 
+    // int comb = (1024 * 1023 * 1022) / 6;
+    // // Compute number of triangles for each prob p
+    // for (int i = 1; i < 6; i++){
+    //     const double p = i / 100.;
+    //     numOfTriangles(p);
+    //     int exp = comb * pow(p,3);
+    //     std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
+    // }
     delete[] matrix_1;
     delete[] matrix_2; 
     delete[] convRes;
