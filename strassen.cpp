@@ -36,13 +36,15 @@ struct Matrix{
             }
         }
         delete zeroForPadding; 
-        delete this; 
+        // delete this; 
     };
     
     // For a matrix of 
     private: 
     int* elt(int n){ 
         int offset = (n / rowLength * matrixLength) + (n % rowLength);
+        // make sure element is in bounds of array. 
+        assert(firstNum + offset < firstNum + (matrixLength * matrixLength));
         return (firstNum + offset); 
     };
     public: 
@@ -147,9 +149,9 @@ int* createNewArray(int dimension){
     return newArray; 
 };
 // adds two matrices and stores them in resMatrix. Allocates new matrix if it does not exist. 
-Matrix* addMatrix(Matrix* m1, Matrix* m2, bool isAddition = true, Matrix* resultMatrix = new Matrix(nullptr, 0, 0)){ 
-    if (resultMatrix->firstNum == nullptr){ 
-        int* resultArray = createNewArray(m1->matrixLength * m1->matrixLength); 
+Matrix* addMatrix(Matrix* m1, Matrix* m2, bool isAddition = true, Matrix* resultMatrix = NULL){ 
+    if (resultMatrix == NULL){ 
+        int* resultArray = createNewArray(m1->matrixLength); 
         resultMatrix = new Matrix(resultArray, m1->rowLength, m1->rowLength); 
     }
     for (int i = 0; i < m1->rowLength; ++i){ 
@@ -179,7 +181,7 @@ Matrix* multiplyStrassen(Matrix* m1, Matrix* m2, int n0){
         return new Matrix(resultArray, m1->rowLength, m1->rowLength); 
     } 
     else{ 
-        resultArray = createNewArray(m1->matrixLength * m1->matrixLength); 
+        resultArray = createNewArray(m1->matrixLength); 
         Matrix* resultMatrix = new Matrix(resultArray, m1->rowLength, m1->matrixLength); 
         bool padded = false; 
         if (m1->rowLength % 2 == 1){ 
@@ -220,6 +222,14 @@ Matrix* multiplyStrassen(Matrix* m1, Matrix* m2, int n0){
             m1->unpad(); 
             m2->unpad(); 
             resultMatrix->unpad(); 
+        }
+        Matrix* matricesToDelete[17] = {FH, AB, CD, GE, AD, EH, BD, GH, AC, EF}; 
+        for(int j = 10; j < 17; ++j){ 
+            matricesToDelete[j] = intermediates[j-10]; 
+        }
+        for (int i = 0; i < 17; ++i){ 
+            delete[] matricesToDelete[i]->firstNum; 
+            delete matricesToDelete[i]; 
         }
         return resultMatrix; 
     }
@@ -329,8 +339,8 @@ int main(int argc, char** argv){
         throw std::invalid_argument("Usage: ./strassen 0 dimension inputfile");
     }
     int dimension = atoi(argv[2]); 
-    int* matrix_1 = createNewArray(dimension * dimension); 
-    int* matrix_2 = createNewArray(dimension * dimension); 
+    int* matrix_1 = createNewArray(dimension); 
+    int* matrix_2 = createNewArray(dimension); 
     Matrix* matrixStruct = new Matrix(matrix_1, dimension, dimension);
     Matrix* matrixStruct2 = new Matrix(matrix_2, dimension, dimension); 
     std::ifstream file(argv[3], std::ios::in);
@@ -345,16 +355,20 @@ int main(int argc, char** argv){
     std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
     std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
     resMatrix->printElts(); 
-    int comb = (1024 * 1023 * 1022) / 6;
-    // Compute number of triangles for each prob p
-    for (int i = 1; i < 6; i++){
-        const double p = i / 100.;
-        numOfTriangles(p);
-        int exp = comb * pow(p,3);
-        std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
-    }
+    // int comb = (1024 * 1023 * 1022) / 6;
+    // // Compute number of triangles for each prob p
+    // for (int i = 1; i < 6; i++){
+    //     const double p = i / 100.;
+    //     numOfTriangles(p);
+    //     int exp = comb * pow(p,3);
+    //     std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
+    // }
     delete[] matrix_1;
     delete[] matrix_2; 
+    delete matrixStruct; 
+    delete matrixStruct2;
+    delete[] resMatrix->firstNum; 
+    delete resMatrix; 
     delete[] convRes;
  
 
