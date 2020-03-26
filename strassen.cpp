@@ -32,7 +32,7 @@ struct Matrix{
     ~Matrix(){
         for(int i = 0; i < 4; ++i){ 
             if (blocks[i] != nullptr){
-            delete blocks[i]; 
+                delete blocks[i]; 
             }
         }
         delete zeroForPadding; 
