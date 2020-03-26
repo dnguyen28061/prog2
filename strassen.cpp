@@ -299,29 +299,19 @@ Matrix* createRandGraph(double p){
 
 int numOfTriangles(double p){
     int avgTriangles = 0;
-    for (int i = 0; i < 5; i++){
-        Matrix* A = createRandGraph(p);
-        Matrix* A2 = multiplyStrassen(A, A, 8);
-        Matrix* A3 = multiplyStrassen(A2, A, 8);
-        int numTriangles = 0;
-        for (int j = 0; j < 1024; j++){
-            numTriangles += *A3->rowCol(j,j);
-        }
-        numTriangles /= 6;
-        avgTriangles += numTriangles;
+    Matrix* A = createRandGraph(p);
+    Matrix* B = createRandGraph(p);
+    Matrix* A2 = multiplyStrassen(A, B, 15);
+    Matrix* A3 = multiplyStrassen(A2, A, 15);
+    int numTriangles = 0;
+    for (int j = 0; j < 1024; j++){
+        numTriangles += *A3->rowCol(j,j);
     }
-    avgTriangles /= 5;
-    std::cout << "Average number of triangles for p = " << p << ": " << avgTriangles << "\n";
-    return avgTriangles;
+    numTriangles /= 6;
+    std::cout << "Number of triangles for p = " << p << ": " << numTriangles << "\n";
+    return numTriangles;
 }
-
-// Returns n choose r
-int fact(int); 
-int nCr(int n, int r) 
-{ 
-    return fact(n) / (fact(r) * fact(n - r)); 
-} 
-  
+ 
 // Returns factorial of n 
 int fact(int n) 
 { 
@@ -363,14 +353,14 @@ int main(int argc, char** argv){
     std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
     std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
     resMatrix->printElts(); 
-    // int comb = nCr(1024, 3);
-    // // Compute number of triangles for each prob p
-    // for (int i = 1; i < 6; i++){
-    //     const double p = i / 100.;
-    //     numOfTriangles(p);
-    //     int exp = comb * pow(p,3);
-    //     std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
-    // }
+    int comb = (1024 * 1023 * 1022) / 6;
+    // Compute number of triangles for each prob p
+    for (int i = 1; i < 6; i++){
+        const double p = i / 100.;
+        numOfTriangles(p);
+        int exp = comb * pow(p,3);
+        std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
+    }
     delete[] matrix_1; 
     delete[] matrix_2;
     delete matrixStruct;
