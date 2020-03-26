@@ -213,8 +213,8 @@ int numOfTriangles(double p){
     int avgTriangles = 0;
     for (int i = 0; i < 5; i++){
         Matrix A = createRandGraph(p);
-        Matrix A2 = multiplyStrassen(A, A);
-        Matrix A3 = multiplyStrassen(A2, A);
+        Matrix A2 = multiplyStrassen(A, A, 8);
+        Matrix A3 = multiplyStrassen(A2, A, 8);
         int numTriangles = 0;
         for (int j = 0; j < 1024; j++){
             numTriangles += *A3.rowCol(j,j);
@@ -265,11 +265,14 @@ int main(int argc, char** argv){
 
     Matrix matrixStruct = Matrix(matrix_1, dimension, dimension);
     Matrix matrixStruct2 = Matrix(matrix_2, dimension, dimension); 
+    matrixStruct.printElts();
+    matrixStruct2.printElts();
     auto start = std::chrono::high_resolution_clock::now(); 
     Matrix resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 8); 
     auto end = std::chrono::high_resolution_clock::now(); 
     int* convRes = multConv(matrixStruct, matrixStruct2);
-    auto endConventional = std::chrono::high_resolution_clock::now(); 
+    auto endConventional = std::chrono::high_resolution_clock::now();
+    resMatrix.printElts();
     std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
     std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
     // std::cout << "\n";
@@ -280,7 +283,7 @@ int main(int argc, char** argv){
     //     std::cout << convRes[i][j] << " "; 
     //     std::cout << "\n"; 
     // }
-    resMatrix.printElts(); 
+    // resMatrix.printElts(); 
 
     int comb = nCr(1024, 3);
     // Compute number of triangles for each prob p
