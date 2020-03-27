@@ -363,35 +363,35 @@ int main(int argc, char** argv){
     readFileIntoArray(&file, dimension, matrixStruct); 
     readFileIntoArray(&file, dimension, matrixStruct2);
     file.close(); 
-    // auto start = std::chrono::high_resolution_clock::now(); 
-    // Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 15); 
-    // auto end = std::chrono::high_resolution_clock::now(); 
-    // int* convRes = multConv(matrixStruct, matrixStruct2);
-    // auto endConventional = std::chrono::high_resolution_clock::now();
-    // std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
-    // std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
+    auto start = std::chrono::high_resolution_clock::now(); 
+    Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 15); 
+    auto end = std::chrono::high_resolution_clock::now(); 
+    int* convRes = multConv(matrixStruct, matrixStruct2);
+    auto endConventional = std::chrono::high_resolution_clock::now();
+    std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
+    std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
     // resMatrix->printElts(); 
-    int i = dimension;
-    int prod = 1;
-    while (i >= dimension - 3){
-        prod *= i;
-        i--;
-    }
-    int comb = prod / 6;
-    // Compute number of triangles for each prob p
-    // for (int i = 1; i < 6; i++){
-    const double p = 1 / 100.;
-    int numTri = numOfTriangles(p, dimension);
-    int exp = comb * pow(p,3);
-    std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
+    // int i = dimension;
+    // int prod = 1;
+    // while (i >= dimension - 3){
+    //     prod *= i;
+    //     i--;
+    // }
+    // int comb = prod / 6;
+    // // Compute number of triangles for each prob p
+    // // for (int i = 1; i < 6; i++){
+    // const double p = 1 / 100.;
+    // int numTri = numOfTriangles(p, dimension);
+    // int exp = comb * pow(p,3);
+    // std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
     // }
     delete[] matrix_1;
     delete[] matrix_2; 
     delete matrixStruct; 
     delete matrixStruct2;
-    // delete[] resMatrix->firstNum; 
-    // delete resMatrix; 
-    // delete[] convRes;
+    delete[] resMatrix->firstNum; 
+    delete resMatrix; 
+    delete[] convRes;
  
 
 }
