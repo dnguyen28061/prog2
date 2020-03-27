@@ -354,7 +354,7 @@ int main(int argc, char** argv){
     readFileIntoArray(&file, dimension, matrixStruct2);
     file.close(); 
     auto start = std::chrono::high_resolution_clock::now(); 
-    Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 15); 
+    Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct, 15); 
     auto end = std::chrono::high_resolution_clock::now(); 
     int* convRes = multConv(matrixStruct, matrixStruct2);
     auto endConventional = std::chrono::high_resolution_clock::now();
