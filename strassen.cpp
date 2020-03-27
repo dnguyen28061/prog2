@@ -7,6 +7,7 @@
 #include<math.h> 
 #include <cmath>
 
+int* createNewArray(int);
 struct Matrix{
     public: 
     int* firstNum; 
@@ -134,6 +135,12 @@ struct Matrix{
         assert(rowLength % 2 == 0); 
         rowLength -= 1; 
     }
+
+    Matrix* copy(){
+        int* copyArray = createNewArray(rowLength);
+        memcpy(copyArray, firstNum, rowLength * rowLength);
+        return new Matrix(copyArray, rowLength, matrixLength);
+    }
 }; 
 
 //creates dynamically sized array of size n, initializes it to 0, and returns a pointer to that object 
@@ -256,6 +263,11 @@ int* multConv(Matrix* m1, Matrix* m2){
     for (int i = 0; i < N; i++){
         resMatrix[i] = new int[N];
     }
+    for (int i = 0; i < N; ++i){ 
+        for(int j = 0; j < N; ++j){ 
+            resMatrix[i][j] = 0; 
+        }
+    }
     int i, j, k; 
     for (i = 0; i < N; i++){ 
         for (k = 0; k < N; k++){ 
@@ -303,7 +315,8 @@ Matrix* createRandGraph(double p, int dim){
 int numOfTriangles(double p, int dim){
     Matrix* A = createRandGraph(p, dim);
     // A->printElts();
-    Matrix* A2 = multiplyStrassen(A, A, 15);
+    Matrix* Acopy = A->copy();
+    Matrix* A2 = multiplyStrassen(A, Acopy, 15);
     // A2->printElts();
     Matrix* A3 = multiplyStrassen(A2, A, 15);
     // A3->printElts();
@@ -349,29 +362,29 @@ int main(int argc, char** argv){
     readFileIntoArray(&file, dimension, matrixStruct); 
     readFileIntoArray(&file, dimension, matrixStruct2);
     file.close(); 
-    auto start = std::chrono::high_resolution_clock::now(); 
-    Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct, 15); 
-    auto end = std::chrono::high_resolution_clock::now(); 
-    int* convRes = multConv(matrixStruct, matrixStruct);
-    auto endConventional = std::chrono::high_resolution_clock::now();
-    std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
-    std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
-    resMatrix->printElts(); 
+    // auto start = std::chrono::high_resolution_clock::now(); 
+    // Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 15); 
+    // auto end = std::chrono::high_resolution_clock::now(); 
+    // int* convRes = multConv(matrixStruct, matrixStruct2);
+    // auto endConventional = std::chrono::high_resolution_clock::now();
+    // std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
+    // std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
+    // resMatrix->printElts(); 
     int comb = (1024 * 1023 * 1022) / 6;
     // Compute number of triangles for each prob p
     // for (int i = 1; i < 6; i++){
-    // const double p = 1 / 100.;
-    // numOfTriangles(p, dimension);
-    // int exp = comb * pow(p,3);
-    // std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
+    const double p = 1 / 100.;
+    numOfTriangles(p, dimension);
+    int exp = comb * pow(p,3);
+    std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
     // }
     delete[] matrix_1;
     delete[] matrix_2; 
     delete matrixStruct; 
     delete matrixStruct2;
-    delete[] resMatrix->firstNum; 
-    delete resMatrix; 
-    delete[] convRes;
+    // delete[] resMatrix->firstNum; 
+    // delete resMatrix; 
+    // delete[] convRes;
  
 
 }
