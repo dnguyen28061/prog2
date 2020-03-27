@@ -371,11 +371,17 @@ int main(int argc, char** argv){
     // std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
     // std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
     // resMatrix->printElts(); 
-    int comb = (1024 * 1023 * 1022) / 6;
+    int i = dimension;
+    int prod = 1;
+    while (i >= dimension - 3){
+        prod *= i;
+        i--;
+    }
+    int comb = prod / 6;
     // Compute number of triangles for each prob p
     // for (int i = 1; i < 6; i++){
     const double p = 1 / 100.;
-    numOfTriangles(p, dimension);
+    int numTri = numOfTriangles(p, dimension);
     int exp = comb * pow(p,3);
     std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
     // }
