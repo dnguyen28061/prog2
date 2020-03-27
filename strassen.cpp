@@ -321,21 +321,20 @@ int numOfTriangles(double p, int dim){
     Matrix* A2 = multiplyStrassen(A, Acopy, 15);
     // A2->printElts();
     Matrix* A3 = multiplyStrassen(A2, Acopy2, 15);
-    A3->printElts();
+    // A3->printElts();
     int numTriangles = 0;
     for (int j = 0; j < dim; j++){
         numTriangles += *A3->rowCol(j,j);
     }
     numTriangles /= 6;
     std::cout << "Number of triangles for p = " << p << ": " << numTriangles << "\n";
-    delete[] A->firstNum; 
-    delete[] Acopy->firstNum; 
-    delete[] A3->firstNum; 
-    delete[] A2->firstNum; 
-    delete A2; 
-    delete A; 
-    delete Acopy; 
-    delete A3; 
+
+    // clean up memory
+    Matrix* matricesToDelete[5] = {A, Acopy, Acopy2, A2, A3}; 
+    for (int i = 0; i < 5; ++i){ 
+        delete matricesToDelete[i]->firstNum; 
+        delete matricesToDelete[i]; 
+    }
     return numTriangles;
 }
  
