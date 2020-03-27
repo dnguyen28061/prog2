@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include<string.h>
 #include <iostream> 
 #include <cassert> 
 #include <fstream> 
@@ -7,6 +8,7 @@
 #include<math.h> 
 #include <cmath>
 
+int* createNewArray(int);
 struct Matrix{
     public: 
     int* firstNum; 
@@ -133,6 +135,12 @@ struct Matrix{
     void unpad(){ 
         assert(rowLength % 2 == 0); 
         rowLength -= 1; 
+    }
+
+    Matrix* copy(){
+        int* copyArray = createNewArray(rowLength);
+        memcpy(copyArray, firstNum, rowLength * rowLength);
+        return new Matrix(copyArray, rowLength, matrixLength);
     }
 }; 
 
@@ -278,16 +286,16 @@ int* multConv(Matrix* m1, Matrix* m2){
 }
 
 // Creates a random graph of edges with probability p
-Matrix* createRandGraph(double p){
-    int* coords = new int[1024 * 1024];
+Matrix* createRandGraph(double p, int dim){
+    int* coords = new int[dim * dim];
     int* coordsPtr = coords;
-    Matrix* randGraph = new Matrix(coordsPtr, 1024, 1024);
+    Matrix* randGraph = new Matrix(coordsPtr, dim, dim);
     int edgeProb;
-    for (int i = 0; i < 1024 * 1024; ++i){ 
+    for (int i = 0; i < dim * dim; ++i){ 
         coords[i] = -1; 
     }
-    for (int i = 0; i < 1024; i++){
-        for (int j = 0; j < 1024; j++){
+    for (int i = 0; i < dim; i++){
+        for (int j = 0; j < dim; j++){
             if (*randGraph->rowCol(j,i) != -1){
                 *randGraph->rowCol(i,j) = *randGraph->rowCol(j,i);
             }
@@ -305,14 +313,16 @@ Matrix* createRandGraph(double p){
     return randGraph;
 }
 
-int numOfTriangles(double p){
-    int avgTriangles = 0;
-    Matrix* A = createRandGraph(p);
-    Matrix* B = createRandGraph(p);
-    Matrix* A2 = multiplyStrassen(A, B, 15);
+int numOfTriangles(double p, int dim){
+    Matrix* A = createRandGraph(p, dim);
+    // A->printElts();
+    Matrix* Acopy = A->copy();
+    Matrix* A2 = multiplyStrassen(A, Acopy, 15);
+    // A2->printElts();
     Matrix* A3 = multiplyStrassen(A2, A, 15);
+    // A3->printElts();
     int numTriangles = 0;
-    for (int j = 0; j < 1024; j++){
+    for (int j = 0; j < dim; j++){
         numTriangles += *A3->rowCol(j,j);
     }
     numTriangles /= 6;
@@ -353,21 +363,21 @@ int main(int argc, char** argv){
     readFileIntoArray(&file, dimension, matrixStruct); 
     readFileIntoArray(&file, dimension, matrixStruct2);
     file.close(); 
-    auto start = std::chrono::high_resolution_clock::now(); 
-    Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct, 15); 
-    auto end = std::chrono::high_resolution_clock::now(); 
-    int* convRes = multConv(matrixStruct, matrixStruct2);
-    auto endConventional = std::chrono::high_resolution_clock::now();
-    std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
-    std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
-    resMatrix->printElts(); 
-    // int comb = (1024 * 1023 * 1022) / 6;
-    // // Compute number of triangles for each prob p
+    // auto start = std::chrono::high_resolution_clock::now(); 
+    // Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 15); 
+    // auto end = std::chrono::high_resolution_clock::now(); 
+    // int* convRes = multConv(matrixStruct, matrixStruct2);
+    // auto endConventional = std::chrono::high_resolution_clock::now();
+    // std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
+    // std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
+    // resMatrix->printElts(); 
+    int comb = (1024 * 1023 * 1022) / 6;
+    // Compute number of triangles for each prob p
     // for (int i = 1; i < 6; i++){
-    //     const double p = i / 100.;
-    //     numOfTriangles(p);
-    //     int exp = comb * pow(p,3);
-    //     std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
+    const double p = 1 / 100.;
+    numOfTriangles(p, dimension);
+    int exp = comb * pow(p,3);
+    std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
     // }
     delete[] matrix_1;
     delete[] matrix_2; 
@@ -375,7 +385,7 @@ int main(int argc, char** argv){
     delete matrixStruct2;
     // delete[] resMatrix->firstNum; 
     // delete resMatrix; 
-    delete[] convRes;
+    // delete[] convRes;
  
 
 }
