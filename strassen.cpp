@@ -261,11 +261,8 @@ int* multConv(Matrix* m1, Matrix* m2){
             resMatrix[i][j] = 0; 
         }
     }
-    // int i, j, k; 
     for (int i = 0; i < N; i++){ 
-        // resMatrix[j] = new int[N];
         for (int k = 0; k < N; k++){ 
-
             for (int j = 0; j < N; j++){
                 resMatrix[i][j] += *(m1->rowCol(i,k)) * *(m2->rowCol(k,j));
             }
@@ -356,13 +353,13 @@ int main(int argc, char** argv){
     readFileIntoArray(&file, dimension, matrixStruct2);
     file.close(); 
     auto start = std::chrono::high_resolution_clock::now(); 
-    // Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 15); 
+    Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 15); 
     auto end = std::chrono::high_resolution_clock::now(); 
     int* convRes = multConv(matrixStruct, matrixStruct2);
     auto endConventional = std::chrono::high_resolution_clock::now();
-    // std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
+    std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
     std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
-    // resMatrix->printElts(); 
+    resMatrix->printElts(); 
     // int comb = (1024 * 1023 * 1022) / 6;
     // // Compute number of triangles for each prob p
     // for (int i = 1; i < 6; i++){
