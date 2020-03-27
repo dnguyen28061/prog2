@@ -139,7 +139,7 @@ struct Matrix{
 
     Matrix* copy(){
         int* copyArray = createNewArray(rowLength);
-        memcpy(copyArray, firstNum, rowLength * rowLength);
+        memcpy(copyArray, firstNum, matrixLength * matrixLength);
         return new Matrix(copyArray, rowLength, matrixLength);
     }
 }; 
@@ -317,9 +317,10 @@ int numOfTriangles(double p, int dim){
     Matrix* A = createRandGraph(p, dim);
     // A->printElts();
     Matrix* Acopy = A->copy();
+    Matrix* Acopy2 = A->copy(); 
     Matrix* A2 = multiplyStrassen(A, Acopy, 15);
     // A2->printElts();
-    Matrix* A3 = multiplyStrassen(A2, A, 15);
+    Matrix* A3 = multiplyStrassen(A2, Acopy2, 15);
     // A3->printElts();
     int numTriangles = 0;
     for (int j = 0; j < dim; j++){
@@ -327,6 +328,13 @@ int numOfTriangles(double p, int dim){
     }
     numTriangles /= 6;
     std::cout << "Number of triangles for p = " << p << ": " << numTriangles << "\n";
+
+    // clean up memory
+    Matrix* matricesToDelete[5] = {A, Acopy, Acopy2, A2, A3}; 
+    for (int i = 0; i < 5; ++i){ 
+        delete matricesToDelete[i]->firstNum; 
+        delete matricesToDelete[i]; 
+    }
     return numTriangles;
 }
  
