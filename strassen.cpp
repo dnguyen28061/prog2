@@ -371,18 +371,18 @@ int main(int argc, char** argv){
     readFileIntoArray(&file, dimension, matrixStruct2);
     file.close(); 
     // Time Strassen vs Conventional processes
-    auto start = std::chrono::high_resolution_clock::now(); 
-    Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 15); 
-    auto end = std::chrono::high_resolution_clock::now(); 
-    int* convRes = multConv(matrixStruct, matrixStruct2);
-    auto endConventional = std::chrono::high_resolution_clock::now();
-    std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
-    std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
-    // Print product matrices
-    resMatrix->printElts();
-    std::cout << "Conventional Result: " << "\n";
-    Matrix* convMatrix = new Matrix(convRes, dimension, dimension);
-    convMatrix->printElts();
+    // auto start = std::chrono::high_resolution_clock::now(); 
+    // Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 15); 
+    // auto end = std::chrono::high_resolution_clock::now(); 
+    // int* convRes = multConv(matrixStruct, matrixStruct2);
+    // auto endConventional = std::chrono::high_resolution_clock::now();
+    // std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
+    // std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
+    // // Print product matrices
+    // resMatrix->printElts();
+    // std::cout << "Conventional Result: " << "\n";
+    // Matrix* convMatrix = new Matrix(convRes, dimension, dimension);
+    // convMatrix->printElts();
     // Compute expected number of triangles
     int i = dimension;
     long long prod = 1;
@@ -403,9 +403,9 @@ int main(int argc, char** argv){
     delete[] matrix_2; 
     delete matrixStruct; 
     delete matrixStruct2;
-    delete[] resMatrix->firstNum; 
-    delete resMatrix; 
-    delete[] convRes;
+    // delete[] resMatrix->firstNum; 
+    // delete resMatrix; 
+    // delete[] convRes;
  
 
 }
