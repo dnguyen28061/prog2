@@ -289,23 +289,25 @@ int* multConv(Matrix* m1, Matrix* m2){
 Matrix* createRandGraph(double p, int dim){
     int* coords = new int[dim * dim];
     int* coordsPtr = coords;
-    Matrix* randGraph = new Matrix(coordsPtr, dim, dim);
-    int edgeProb;
     for (int i = 0; i < dim * dim; ++i){ 
         coords[i] = -1; 
     }
+    Matrix* randGraph = new Matrix(coordsPtr, dim, dim);
+    int edgeProb;
     for (int i = 0; i < dim; i++){
         for (int j = 0; j < dim; j++){
-            if (*randGraph->rowCol(j,i) != -1){
-                *randGraph->rowCol(i,j) = *randGraph->rowCol(j,i);
+            if (*randGraph->rowCol(i,j) != -1){
+                continue;
             }
             else{
                 edgeProb = (rand() % 100) + 1;
-                if (edgeProb <= p * 100.){
+                if (edgeProb <= p * 100){
                     *randGraph->rowCol(i,j) = 1;
+                    *randGraph->rowCol(j,i) = 1;
                 }
                 else{
                     *randGraph->rowCol(i,j) = 0;
+                    *randGraph->rowCol(j,i) = 0;
                 }
             }
         }
@@ -315,23 +317,18 @@ Matrix* createRandGraph(double p, int dim){
 
 int numOfTriangles(double p, int dim){
     Matrix* A = createRandGraph(p, dim);
-    // A->printElts();
-    Matrix* Acopy = A->copy();
-    Matrix* Acopy2 = A->copy(); 
-    Matrix* A2 = multiplyStrassen(A, Acopy, 15);
-    // A2->printElts();
-    Matrix* A3 = multiplyStrassen(A2, Acopy2, 15);
-    // A3->printElts();
+    Matrix* A2 = multiplyStrassen(A, A, 15);
+    Matrix* A3 = multiplyStrassen(A2, A, 15);
     int numTriangles = 0;
-    for (int j = 0; j < dim; j++){
-        numTriangles += *A3->rowCol(j,j);
+    for (int i = 0; i < dim; i++){
+        numTriangles += *A3->rowCol(i,i);
     }
     numTriangles /= 6;
     std::cout << "Number of triangles for p = " << p << ": " << numTriangles << "\n";
 
     // clean up memory
-    Matrix* matricesToDelete[5] = {A, Acopy, Acopy2, A2, A3}; 
-    for (int i = 0; i < 5; ++i){ 
+    Matrix* matricesToDelete[3] = {A, A2, A3}; 
+    for (int i = 0; i < 3; ++i){ 
         delete matricesToDelete[i]->firstNum; 
         delete matricesToDelete[i]; 
     }
@@ -362,15 +359,18 @@ int main(int argc, char** argv){
     if (argc != 4) {
         throw std::invalid_argument("Usage: ./strassen 0 dimension inputfile");
     }
+
     int dimension = atoi(argv[2]); 
     int* matrix_1 = createNewArray(dimension); 
     int* matrix_2 = createNewArray(dimension); 
+    // Create test matrices
     Matrix* matrixStruct = new Matrix(matrix_1, dimension, dimension);
     Matrix* matrixStruct2 = new Matrix(matrix_2, dimension, dimension); 
     std::ifstream file(argv[3], std::ios::in);
     readFileIntoArray(&file, dimension, matrixStruct); 
     readFileIntoArray(&file, dimension, matrixStruct2);
     file.close(); 
+    // Time Strassen vs Conventional processes
     auto start = std::chrono::high_resolution_clock::now(); 
     Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 15); 
     auto end = std::chrono::high_resolution_clock::now(); 
@@ -378,21 +378,27 @@ int main(int argc, char** argv){
     auto endConventional = std::chrono::high_resolution_clock::now();
     std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
     std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
-    // resMatrix->printElts(); 
-    // int i = dimension;
-    // int prod = 1;
-    // while (i >= dimension - 3){
-    //     prod *= i;
-    //     i--;
-    // }
-    // int comb = prod / 6;
-    // // Compute number of triangles for each prob p
-    // // for (int i = 1; i < 6; i++){
-    // const double p = 1 / 100.;
-    // int numTri = numOfTriangles(p, dimension);
-    // int exp = comb * pow(p,3);
-    // std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
-    // }
+    // Print product matrices
+    resMatrix->printElts();
+    std::cout << "Conventional Result: " << "\n";
+    Matrix* convMatrix = new Matrix(convRes, dimension, dimension);
+    convMatrix->printElts();
+    // Compute expected number of triangles
+    int i = dimension;
+    long long prod = 1;
+    while (i > dimension - 3){
+        prod *= i;
+        i--;
+    }
+    long long comb = prod / 6;
+    // Compute number of triangles for each prob p
+    for (int i = 1; i < 6; i++){
+        const double p = i / 100.;
+        int numTri = numOfTriangles(p, dimension);
+        int exp = comb * pow(p,3);
+        std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
+    }
+    // Free up memory
     delete[] matrix_1;
     delete[] matrix_2; 
     delete matrixStruct; 
