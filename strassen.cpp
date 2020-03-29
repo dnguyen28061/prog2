@@ -156,6 +156,7 @@ int* createNewArray(int dimension){
     }
     return newArray; 
 };
+
 // adds two matrices and stores them in resMatrix. Allocates new matrix if it does not exist. 
 Matrix* addMatrix(Matrix* m1, Matrix* m2, bool isAddition = true, Matrix* resultMatrix = NULL){ 
     if (resultMatrix == NULL){ 
@@ -391,8 +392,8 @@ int main(int argc, char** argv){
         int* convRes = multConv(matrixStruct, matrixStruct2);
     } 
     auto endConventional = std::chrono::high_resolution_clock::now();
-    std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() / 15 << "\n"; 
-    std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() / 15 << "\n"; 
+    std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() / 5 << "\n"; 
+    std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() / 5 << "\n"; 
     // std::cout << n0 << "\n"; 
     // Print product matrices
     // resMatrix->printElts();
