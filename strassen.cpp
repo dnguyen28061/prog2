@@ -46,9 +46,6 @@ struct Matrix{
     int* elt(int n){ 
         int offset = (n / rowLength * matrixLength) + (n % rowLength);
         // make sure element is in bounds of array. 
-        if (offset >= matrixLength * matrixLength){
-            std::cout << n; 
-        }
         assert(offset < matrixLength * matrixLength);
         return (firstNum + offset); 
     };
@@ -184,7 +181,7 @@ Matrix* addMatrix(Matrix* m1, Matrix* m2, bool isAddition = true, Matrix* result
 int* multConv(Matrix*, Matrix*); 
 Matrix* multiplyStrassen(Matrix* m1, Matrix* m2, int n0){
     assert(m1->rowLength = m2->rowLength); 
-    // base case 
+    // base case s
     int* resultArray; 
     if (m1->rowLength <= n0){ 
         // multiply two matrices and store product in m1 
@@ -240,13 +237,13 @@ Matrix* multiplyStrassen(Matrix* m1, Matrix* m2, int n0){
             resultMatrix->unpad(); 
         }
         Matrix* matricesToDelete[17] = {FH, AB, CD, GE, AD, EH, BD, GH, AC, EF}; 
-        for(int j = 10; j < 17; ++j){ 
-            matricesToDelete[j] = intermediates[j-10]; 
-        }
-        for (int i = 0; i < 17; ++i){ 
-            delete[] matricesToDelete[i]->firstNum; 
-            delete matricesToDelete[i]; 
-        }
+        // for(int j = 10; j < 17; ++j){ 
+        //     matricesToDelete[j] = intermediates[j-10]; 
+        // }
+        // for (int i = 0; i < 17; ++i){ 
+        //     delete[] matricesToDelete[i]->firstNum; 
+        //     delete matricesToDelete[i]; 
+        // }
         return resultMatrix; 
     }
 };
@@ -337,7 +334,7 @@ int numOfTriangles(double p, int dim){
     // clean up memory
     Matrix* matricesToDelete[3] = {A, A2, A3}; 
     for (int i = 0; i < 3; ++i){ 
-        delete matricesToDelete[i]->firstNum; 
+        delete[] matricesToDelete[i]->firstNum; 
         delete matricesToDelete[i]; 
     }
     return numTriangles;
@@ -364,13 +361,14 @@ void readFileIntoArray(std::ifstream* file, int dimension, Matrix* matrix){
 }
 
 int main(int argc, char** argv){ 
-    if (argc != 4) {
+    if (argc != 5) {
         throw std::invalid_argument("Usage: ./strassen 0 dimension inputfile");
     }
 
     int dimension = atoi(argv[2]); 
     int* matrix_1 = createNewArray(dimension); 
     int* matrix_2 = createNewArray(dimension); 
+    int n0 = atoi(argv[4]); 
     // Create test matrices
     Matrix* matrixStruct = new Matrix(matrix_1, dimension, dimension);
     Matrix* matrixStruct2 = new Matrix(matrix_2, dimension, dimension); 
@@ -380,14 +378,39 @@ int main(int argc, char** argv){
     file.close(); 
     // Time Strassen vs Conventional processes
     auto start = std::chrono::high_resolution_clock::now(); 
+<<<<<<< HEAD
+    for (int i = 0; i < 15; ++i){ 
+        Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, n0); 
+    } 
+    auto end = std::chrono::high_resolution_clock::now(); 
+    for (int i = 0; i < 15; ++i){
+        int* convRes = multConv(matrixStruct, matrixStruct2);
+    } 
+=======
     Matrix* resMatrix = multiplyStrassen(matrixStruct, matrixStruct2, 15); 
     auto end = std::chrono::high_resolution_clock::now(); 
     int* convRes = multConv(matrixStruct, matrixStruct2);
+>>>>>>> 3903bad2ae035a236aeb18a6421a7028091eef3d
     auto endConventional = std::chrono::high_resolution_clock::now();
-    std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() << "\n"; 
-    std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() << "\n"; 
+    std::cout << "Time for Strassen: " << (std::chrono::duration_cast<std::chrono::microseconds>(end - start)).count() / 15 << "\n"; 
+    std::cout << "Time for Conventional: " << (std::chrono::duration_cast<std::chrono::microseconds>(endConventional - end)).count() / 15 << "\n"; 
+    std::cout << n0 << "\n"; 
     // Print product matrices
     // resMatrix->printElts();
+<<<<<<< HEAD
+    // std::cout << "Conventional Result: " << "\n";
+    // Matrix* convMatrix = new Matrix(convRes, dimension, dimension);
+    // convMatrix->printElts();
+    // Compute expected number of triangles
+    int i = dimension;
+    long long prod = 1;
+    while (i > dimension - 3){
+        prod *= i;
+        i--;
+    }
+    long long comb = prod / 6;
+    // Compute number of triangles for each prob p
+=======
     std::cout << "Conventional Result: " << "\n";
     Matrix* convMatrix = new Matrix(convRes, dimension, dimension);
     // convMatrix->printElts();
@@ -400,6 +423,7 @@ int main(int argc, char** argv){
     // }
     // long long comb = prod / 6;
     // // Compute number of triangles for each prob p
+>>>>>>> 3903bad2ae035a236aeb18a6421a7028091eef3d
     // for (int i = 1; i < 6; i++){
     //     const double p = i / 100.;
     //     int numTri = numOfTriangles(p, dimension);
@@ -407,6 +431,15 @@ int main(int argc, char** argv){
     //     std::cout << "Expected # of Triangles for p = " << p << ": " << exp << "\n";
     // }
     // Free up memory
+<<<<<<< HEAD
+    // delete[] matrix_1;
+    // delete[] matrix_2; 
+    // delete matrixStruct; 
+    // delete matrixStruct2;
+    // delete[] resMatrix->firstNum; 
+    // delete resMatrix; 
+    // delete[] convRes;
+=======
     delete[] matrix_1;
     delete[] matrix_2; 
     delete matrixStruct; 
@@ -416,4 +449,5 @@ int main(int argc, char** argv){
     delete[] convRes;
  
 
+>>>>>>> 3903bad2ae035a236aeb18a6421a7028091eef3d
 }
